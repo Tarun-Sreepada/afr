@@ -1,0 +1,34 @@
+
+== k1: 1 rounds, copy sizes [689104, 694823, 733768], join median 0.768s (runs 0.753, 0.768, 0.749, 0.777, 0.773)
+ depth                  op  rows_out     secs                                  cond
+     1 UNGROUPED_AGGREGATE         1 0.000010                                      
+     2           HASH_JOIN      1129 1.852259 a = b b = a (ts + 3600) >= ts ts < ts
+     3           HASH_JOIN 150628246 2.065650                         a = b ts > ts
+     4            SEQ_SCAN    694811 0.002759                                      
+     4            SEQ_SCAN    689104 0.000351                                      
+     3            SEQ_SCAN    733754 0.000716                                      
+   fixed plan build-f2: join median 1.350s, 2-hop rows 150628246, lower join 2.177s (runs 1.346, 1.350, 1.350, 1.339, 1.360)
+   fixed plan build-f1: join median 0.766s, 2-hop rows 150628246, lower join 2.134s (runs 0.764, 0.796, 0.766, 0.809, 0.754)
+
+== k2: 2 rounds, copy sizes [681833, 674308, 686728], join median 1.318s (runs 1.318, 1.370, 1.292, 1.329, 1.298)
+ depth                  op  rows_out     secs                                  cond
+     1 UNGROUPED_AGGREGATE         1 0.000013                                      
+     2           HASH_JOIN      1129 1.905912 a = b b = a (ts + 3600) >= ts ts < ts
+     3           HASH_JOIN 146572336 2.045783                         b = a ts < ts
+     4            SEQ_SCAN    681833 0.001803                                      
+     4            SEQ_SCAN    674282 0.000798                                      
+     3              FILTER    686716 0.000741                                      
+     4            SEQ_SCAN    686723 0.000608                                      
+   fixed plan build-f2: join median 1.324s, 2-hop rows 146572336, lower join 2.072s (runs 1.388, 1.361, 1.321, 1.304, 1.324)
+   fixed plan build-f1: join median 0.762s, 2-hop rows 146572336, lower join 2.084s (runs 0.762, 0.762, 0.762, 0.773, 0.753)
+
+== fix: 17 rounds, copy sizes [678249, 669143, 680209], join median 1.317s (runs 1.326, 1.321, 1.317, 1.294, 1.293)
+ depth                  op  rows_out     secs                                  cond
+     1 UNGROUPED_AGGREGATE         1 0.000011                                      
+     2           HASH_JOIN      1129 1.868788 a = b b = a (ts + 3600) >= ts ts < ts
+     3           HASH_JOIN 144991330 2.059712                         b = a ts < ts
+     4            SEQ_SCAN    678249 0.001847                                      
+     4            SEQ_SCAN    669143 0.000404                                      
+     3            SEQ_SCAN    680209 0.000407                                      
+   fixed plan build-f2: join median 1.347s, 2-hop rows 144991330, lower join 2.085s (runs 1.334, 1.303, 1.393, 1.384, 1.347)
+   fixed plan build-f1: join median 0.759s, 2-hop rows 144991330, lower join 1.946s (runs 0.759, 0.759, 0.734, 0.776, 0.749)

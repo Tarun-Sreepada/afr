@@ -56,7 +56,7 @@ than t.
 
 | Question | Answer |
 |---|---|
-| Do rounds past the first pay on real graphs? | **No.** On every SNAP graph, round 1 gets all of the gain. Extra rounds are within noise, and sometimes slower. |
+| Do rounds past the first pay on real graphs? | **No.** On every SNAP graph, round 1 gets essentially all of the gain. Cases where 1 round *beat* the fixpoint turned out to be DuckDB picking a different hash-join build side (see *The one-round anomaly*); with the plan fixed, all round counts run equally fast. |
 | Does the fixpoint ever pay? | Only on synthetic dead-end chains of depth ≥ 8 leading into a hub (up to ~240× on triangles). |
 | Does AFR beat RPT+? | On temporal cycles, by 1.2–2× on cheap queries, from **one** round of per-key min/max timestamp bounds. That's not a fixpoint effect, and the gain vanishes on expensive queries. |
 | Does it rescue queries that time out? | No (email-Eu-core temporal 4-cycles: plain DuckDB and the AFR fixpoint both exceed 300 s). |
@@ -147,14 +147,18 @@ Speedup over plain DuckDB 1.3 (selected rows; full data in `results/afr_vs_rpt_s
 | CollegeMsg (60K events) | tri, 1h | 0.08 s | 0.99× | 1.18× | 1.27× | 1.24× | 1.02× |
 | CollegeMsg | c4, 1h | 3.4 s | 1.01× | 1.23× | 1.20× | 1.23× | 0.97× |
 | email-Eu-core-temporal (332K) | tri, 1h | 20.5 s | 1.02× | 1.40× | 1.43× | 1.22× | 1.01× |
-| email-Eu-core-temporal | c4, 1h | > 300 s | timeout | — | — | timeout | — |
+| email-Eu-core-temporal | c4, 1h / 1d / 1w | > 300 s | timeout | — | — | timeout | — |
 | sx-mathoverflow (390K) | tri, 1h | 1.4 s | 0.98× | 1.36× | 1.21× | 1.19× | 1.11× |
 | sx-mathoverflow | c4, 1h | 127 s | 0.98× | 0.99× | 1.08× | 1.07× | 1.11× |
 | sx-askubuntu (727K) | tri, 1h | 0.92 s | 1.00× | 1.54× | 1.21× | 1.13× | 1.15× |
 | sx-askubuntu | c4, 1w | 18.4 s | 0.98× | 0.94× | 0.76× | 0.77× | 1.00× |
+| sx-superuser (1.1M) | tri, 1h | 1.6 s | 1.00× | 2.01× | 1.17× | 1.08× | 0.98× |
+| sx-superuser | c4, 1h | 28.3 s | 1.00× | 1.25× | 1.38× | 1.34× | 1.01× |
 | wiki-talk-temporal (6.1M) | tri, 1h | 4.7 s | 1.00× | 1.70× | 2.04× | 1.47× | 1.46× |
 | soc-Epinions1 | tri, one1% | 0.02 s | 1.11× | 0.57× | 0.64× | 0.62× | — |
 | soc-Slashdot0902 | tri, all20% | 0.02 s | 1.05× | 0.28× | 0.27× | 0.28× | — |
+| email-EuAll | tri, all50% | 0.16 s | 1.02× | 1.94× | 2.26× | 2.31× | — |
+| web-Google | tri, one1% | 0.03 s | 1.29× | 0.51× | 0.50× | 0.46× | — |
 
 Findings:
 - **RPT+ is plain DuckDB on these queries (0.98–1.04×).** It builds Bloom filters only from filtered (or
@@ -165,17 +169,49 @@ Findings:
   on most graphs (1.46× on wiki-talk). Going from 1 round to the fixpoint adds nothing.
 - **Expensive queries don't benefit.** The cost is in two-hop paths through hubs, and hubs have early and late
   edges in every direction, so they pass the timestamp test.
-- **The filtered static triangles take milliseconds.** Reduction overhead outweighs the join, so AFR loses.
-- **Open anomaly:** AFR after 1 round is often *faster* than the fixpoint even though the fixpoint removes more
-  rows (sx-askubuntu triangles 1.54× vs 1.13×). Reduction time doesn't explain it. A likely cause is DuckDB
-  choosing a different join order on the smaller inputs, but this has not been checked with `EXPLAIN ANALYZE`.
-- **Coverage:** when this README was written the sweep was still running for email-Eu-core (4-cycles, 1-day and
-  1-week windows), sx-superuser, the filtered email-EuAll and web-Google cases, wiki-talk 4-cycles and the
+- **The filtered static triangles take milliseconds.** Reduction overhead outweighs the join, so AFR mostly
+  loses (0.3–0.6× on soc-Epinions1, soc-Slashdot0902 and web-Google). email-EuAll is the exception (up to 2.3×),
+  but its queries take 0.01–0.16 s, so the absolute differences are tens of milliseconds.
+- **1 round sometimes beats the fixpoint, but that's a plan effect.** See *The one-round anomaly* below.
+- **Coverage:** when this README was last updated the sweep was still running wiki-talk 4-cycles and the
   sx-stackoverflow triangles. sx-stackoverflow 4-cycles were skipped (expected to time out everywhere). The CSVs
   hold whatever had finished.
 - `results/afr_vs_rpt_unpinned.*` is an earlier run without `numactl` pinning, kept for reference.
 - The largest joins (4-cycles on the bigger temporal graphs) spill to disk (DuckDB's `.tmp/`) even with a 96 GB
   memory limit, so their timings include spill I/O for every system.
+
+### The one-round anomaly (`experiments/one_round_anomaly.py`)
+
+In several temporal cases AFR after 1 round was much faster than after 2 rounds or at the fixpoint, although
+the fixpoint keeps fewer rows (sx-superuser triangles, 1h: 2.01× vs 1.08×; sx-askubuntu: 1.54× vs 1.13×). The
+script reduces one case with 1 round, 2 rounds and to the fixpoint, and profiles DuckDB 1.3's join on each. It
+also runs each with join ordering and build-side selection turned off
+(`disabled_optimizers = 'join_order,build_side_probe_side'`), building the lower join's hash table on f2 (as the
+SQL is written) and on f1 (FROM order swapped).
+
+Triangles, 1-hour window, join time (median of 5, 8 threads, run while the sweep occupied the machine, so only
+relative numbers matter):
+
+| case | mode | 2-hop rows | DuckDB's own plan | fixed plan, build f2 | fixed plan, build f1 |
+|---|---|---|---|---|---|
+| sx-askubuntu | no reduction | 139.7M | 0.98 s | 1.00 s | 1.00 s |
+| sx-askubuntu | 1 round | 78.6M | 0.57 s (builds f1) | 0.75 s | 0.58 s |
+| sx-askubuntu | 2 rounds | 76.3M | 0.74 s (builds f2) | 0.73 s | 0.55 s |
+| sx-askubuntu | fixpoint (11) | 75.5M | 0.72 s (builds f2) | 0.75 s | 0.55 s |
+| sx-superuser | 1 round | 150.6M | 0.77 s (builds f1) | 1.35 s | 0.77 s |
+| sx-superuser | 2 rounds | 146.6M | 1.32 s (builds f2) | 1.32 s | 0.76 s |
+| sx-superuser | fixpoint (17) | 145.0M | 1.32 s (builds f2) | 1.35 s | 0.76 s |
+
+- **The anomaly is the build side.** DuckDB builds the hash table on the smaller copy. After 1 round f1 is
+  smallest; after more rounds f2 is, and building on f2 is 1.3–1.8× slower on these graphs. With the plan held
+  fixed, 1 round, 2 rounds and the fixpoint run equally fast. The extra rounds remove only 2–4% more two-hop rows.
+- **So extra rounds don't hurt, and they don't help either.** The conclusion that round 1 gets the gain stands.
+- **Part of AFR's measured gain depends on this plan choice.** On unreduced input both build sides cost the same.
+  On sx-askubuntu, AFR's speedup after reduction is about 1.3× with the slow side and 1.8× with the fast one. Which side
+  wins depends on the data, and a cost-based engine would have to model it. The per-operator profiles show
+  similar summed operator time for both sides while wall time differs, which suggests a difference in parallel
+  efficiency rather than in total work; this was not investigated further.
+- Profiles and full output: `results/anomaly/`.
 
 ### Threshold pruning (desk check, no code)
 
@@ -200,6 +236,7 @@ experiments/
   plot.py                        plots for experiment 1
   afr_kernel.cpp, afr_native.py  experiment 2: native operator with stopping rules, traps
   afr_cycle.cpp, afr_vs_rpt.py   experiment 3: per-copy equality/temporal reduction vs RPT+
+  one_round_anomaly.py           profiles why 1 round can beat the fixpoint (hash-join build side)
   rptplus_disable_toggle.patch   adds RPT_DISABLE=1 to the RPT+ fork (plain DuckDB 1.3 baseline)
 results/                         CSVs, logs and plots of all runs
 data/                            downloaded graphs and Parquet files (not committed)
@@ -279,6 +316,11 @@ numactl --cpunodebind=1 --membind=1 uv run python experiments/afr_vs_rpt.py \
     --tag _s1 > results/afr_vs_rpt_s1.log 2>&1 &
 #    options: --queries tri,c4  --timeout 300  --reps 3  --threads 16
 #    (the published run stopped sx-stackoverflow after its triangles; use --queries tri for it)
+```
+
+```bash
+# the one-round anomaly: profiles + fixed-plan runs for one temporal triangle case
+numactl --cpunodebind=1 --membind=1 uv run python experiments/one_round_anomaly.py sx-askubuntu --window 3600 --fixed-plan
 ```
 
 Each script writes CSVs to `results/` and replaces earlier rows for the datasets (experiment 3: dataset and

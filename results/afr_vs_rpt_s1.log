@@ -275,3 +275,5 @@ wiki-talk-temporal: 6100538 edges
   tri-1w       afr-fix       2.749s rounds=  10 rows=  10270656 reduce=0.168s join=2.509s  vs1.3   1.72x  vsRPT+   1.72x
   tri-1w       afr-eq-fix    3.219s rounds=   3 rows=  11882715 reduce=0.032s join=3.114s  vs1.3   1.47x  vsRPT+   1.47x
   c4-1h        duckdb1.3       nans count=None
+  c4-1h        rpt+            nans count=None
+  c4-1h        duckdb2.0       nans count=None
