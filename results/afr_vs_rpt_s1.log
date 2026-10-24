@@ -277,3 +277,4 @@ wiki-talk-temporal: 6100538 edges
   c4-1h        duckdb1.3       nans count=None
   c4-1h        rpt+            nans count=None
   c4-1h        duckdb2.0       nans count=None
+  c4-1h        afr-fix timed out too; skipping the other modes

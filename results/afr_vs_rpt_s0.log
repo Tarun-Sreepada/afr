@@ -158,3 +158,4 @@ web-Google: 5105039 edges
   tri-all50%   afr-fix       0.241s rounds=   6 rows=   4521825 reduce=0.159s join=0.054s  vs1.3   0.33x  vsRPT+   0.28x
 sx-stackoverflow: 47903266 edges
   tri-1h       duckdb1.3    98.608s count=158254
+  tri-1h       rpt+         98.492s count=158254

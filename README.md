@@ -155,6 +155,8 @@ Speedup over plain DuckDB 1.3 (selected rows; full data in `results/afr_vs_rpt_s
 | sx-superuser (1.1M) | tri, 1h | 1.6 s | 1.00× | 2.01× | 1.17× | 1.08× | 0.98× |
 | sx-superuser | c4, 1h | 28.3 s | 1.00× | 1.25× | 1.38× | 1.34× | 1.01× |
 | wiki-talk-temporal (6.1M) | tri, 1h | 4.7 s | 1.00× | 1.70× | 2.04× | 1.47× | 1.46× |
+| wiki-talk-temporal | c4, 1h | > 300 s | timeout | — | — | timeout | — |
+| sx-stackoverflow (63M) | tri, 1h | 98.6 s | 1.00× | not run | not run | not run | not run |
 | soc-Epinions1 | tri, one1% | 0.02 s | 1.11× | 0.57× | 0.64× | 0.62× | — |
 | soc-Slashdot0902 | tri, all20% | 0.02 s | 1.05× | 0.28× | 0.27× | 0.28× | — |
 | email-EuAll | tri, all50% | 0.16 s | 1.02× | 1.94× | 2.26× | 2.31× | — |
@@ -173,9 +175,10 @@ Findings:
   loses (0.3–0.6× on soc-Epinions1, soc-Slashdot0902 and web-Google). email-EuAll is the exception (up to 2.3×),
   but its queries take 0.01–0.16 s, so the absolute differences are tens of milliseconds.
 - **1 round sometimes beats the fixpoint, but that's a plan effect.** See *The one-round anomaly* below.
-- **Coverage:** when this README was last updated the sweep was still running wiki-talk 4-cycles and the
-  sx-stackoverflow triangles. sx-stackoverflow 4-cycles were skipped (expected to time out everywhere). The CSVs
-  hold whatever had finished.
+- **Coverage:** the sweep was stopped once the picture was clear. Not run: wiki-talk 4-cycles with 1-day and
+  1-week windows, AFR on sx-stackoverflow, and sx-stackoverflow 1-day/1-week windows and 4-cycles. The last two
+  cases above come from the logs (`results/afr_vs_rpt_s*.log`), since the sweep saves CSV rows only after a whole
+  query family finishes.
 - `results/afr_vs_rpt_unpinned.*` is an earlier run without `numactl` pinning, kept for reference.
 - The largest joins (4-cycles on the bigger temporal graphs) spill to disk (DuckDB's `.tmp/`) even with a 96 GB
   memory limit, so their timings include spill I/O for every system.
