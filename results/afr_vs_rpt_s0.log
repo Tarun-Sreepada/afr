@@ -1,0 +1,45 @@
+email-Eu-core-temporal: 332334 edges
+  tri-1h       duckdb1.3    20.489s count=2042
+  tri-1h       rpt+         20.025s count=2042
+  tri-1h       duckdb2.0    20.027s count=2042
+  tri-1h       afr-k1       14.658s rounds=   1 rows=    957890 reduce=0.002s join=14.641s  vs1.3   1.40x  vsRPT+   1.37x
+  tri-1h       afr-k2       14.372s rounds=   2 rows=    954653 reduce=0.003s join=14.357s  vs1.3   1.43x  vsRPT+   1.39x
+  tri-1h       afr-k4       14.273s rounds=   4 rows=    951891 reduce=0.006s join=14.254s  vs1.3   1.44x  vsRPT+   1.40x
+  tri-1h       afr-fix      16.730s rounds=  14 rows=    948681 reduce=0.020s join=16.698s  vs1.3   1.22x  vsRPT+   1.20x
+  tri-1h       afr-eq-fix   20.279s rounds=   2 rows=    982653 reduce=0.002s join=20.267s  vs1.3   1.01x  vsRPT+   0.99x
+  tri-1d       duckdb1.3    20.623s count=122157
+  tri-1d       rpt+         20.398s count=122157
+  tri-1d       duckdb2.0    20.863s count=122157
+  tri-1d       afr-k1       14.947s rounds=   1 rows=    959239 reduce=0.002s join=14.930s  vs1.3   1.38x  vsRPT+   1.36x
+  tri-1d       afr-k2       14.761s rounds=   2 rows=    957445 reduce=0.003s join=14.745s  vs1.3   1.40x  vsRPT+   1.38x
+  tri-1d       afr-k4       17.193s rounds=   4 rows=    956937 reduce=0.006s join=17.175s  vs1.3   1.20x  vsRPT+   1.19x
+  tri-1d       afr-fix      16.705s rounds=   8 rows=    956921 reduce=0.010s join=16.685s  vs1.3   1.23x  vsRPT+   1.22x
+  tri-1d       afr-eq-fix   20.907s rounds=   2 rows=    982653 reduce=0.002s join=20.893s  vs1.3   0.99x  vsRPT+   0.98x
+  tri-1w       duckdb1.3    20.529s count=2623231
+  tri-1w       rpt+         20.744s count=2623231
+  tri-1w       duckdb2.0    20.381s count=2623231
+  tri-1w       afr-k1       17.604s rounds=   1 rows=    960454 reduce=0.002s join=17.588s  vs1.3   1.17x  vsRPT+   1.18x
+  tri-1w       afr-k2       17.795s rounds=   2 rows=    959616 reduce=0.003s join=17.780s  vs1.3   1.15x  vsRPT+   1.17x
+  tri-1w       afr-k4       17.658s rounds=   4 rows=    959588 reduce=0.005s join=17.640s  vs1.3   1.16x  vsRPT+   1.17x
+  tri-1w       afr-fix      17.059s rounds=   4 rows=    959588 reduce=0.005s join=17.044s  vs1.3   1.20x  vsRPT+   1.22x
+  tri-1w       afr-eq-fix   20.698s rounds=   2 rows=    982653 reduce=0.002s join=20.684s  vs1.3   0.99x  vsRPT+   1.00x
+  c4-1h        duckdb1.3       nans count=None
+  c4-1h        rpt+            nans count=None
+  c4-1h        duckdb2.0       nans count=None
+  c4-1h        afr-fix timed out too; skipping the other modes
+  c4-1d        duckdb1.3       nans count=None
+  c4-1d        rpt+            nans count=None
+  c4-1d        duckdb2.0       nans count=None
+  c4-1d        afr-fix timed out too; skipping the other modes
+  c4-1w        duckdb1.3       nans count=None
+  c4-1w        rpt+            nans count=None
+  c4-1w        duckdb2.0       nans count=None
+  c4-1w        afr-fix timed out too; skipping the other modes
+sx-superuser: 1108739 edges
+  tri-1h       duckdb1.3     1.574s count=1129
+  tri-1h       rpt+          1.568s count=1129
+  tri-1h       duckdb2.0     1.506s count=1129
+  tri-1h       afr-k1        0.781s rounds=   1 rows=   2117695 reduce=0.011s join=0.749s  vs1.3   2.01x  vsRPT+   2.01x
+  tri-1h       afr-k2        1.343s rounds=   2 rows=   2042869 reduce=0.020s join=1.303s  vs1.3   1.17x  vsRPT+   1.17x
+  tri-1h       afr-k4        1.355s rounds=   4 rows=   2032200 reduce=0.039s join=1.295s  vs1.3   1.16x  vsRPT+   1.16x
+  tri-1h       afr-fix       1.461s rounds=  17 rows=   2027601 reduce=0.152s join=1.289s  vs1.3   1.08x  vsRPT+   1.07x

@@ -1,0 +1,114 @@
+Running as unit: run-r1ae5c630825e454d978fe63cab9f9b5a.scope; invocation ID: 0eaa5c55776d41bfa68dbf583040826d
+soc-Epinions1: 508837 edges
+  cycle round 1: 452552 rows (-56285) 0.031s
+  cycle round 2: 449932 rows (-2620) 0.030s
+  cycle round 3: 449800 rows (-132) 0.030s
+  cycle round 4: 449786 rows (-14) 0.027s
+  cycle round 5: 449786 rows (-0) 0.026s
+  tri k=0: 0.233s count=2220930
+  tri k=1: 0.221s count=2220930
+  tri k=2: 0.214s count=2220930
+  tri k=3: 0.220s count=2220930
+  tri k=4: 0.217s count=2220930
+  c4 k=0: 1.418s count=178704122
+  c4 k=1: 1.511s count=178704122
+  c4 k=2: 1.522s count=178704122
+  c4 k=3: 1.514s count=178704122
+  c4 k=4: 1.516s count=178704122
+  path round 1: 958071 rows (-59603) 0.028s
+  path round 2: 958071 rows (-0) 0.025s
+  path2 k=0: 0.049s count=39924100
+  path2 k=1: 0.052s count=39924100
+soc-Slashdot0902: 870161 edges
+  cycle round 1: 842264 rows (-27897) 0.055s
+  cycle round 2: 842217 rows (-47) 0.053s
+  cycle round 3: 842217 rows (-0) 0.045s
+  tri k=0: 0.550s count=2697948
+  tri k=1: 0.454s count=2697948
+  tri k=2: 0.464s count=2697948
+  c4 k=0: 3.448s count=501201270
+  c4 k=1: 3.175s count=501201270
+  c4 k=2: 3.425s count=501201270
+  path round 1: 1712425 rows (-27897) 0.042s
+  path round 2: 1712425 rows (-0) 0.046s
+  path2 k=0: 0.104s count=115331544
+  path2 k=1: 0.081s count=115331544
+email-EuAll: 418956 edges
+  cycle round 1: 151809 rows (-267147) 0.031s
+  cycle round 2: 151197 rows (-612) 0.015s
+  cycle round 3: 151182 rows (-15) 0.014s
+  cycle round 4: 151182 rows (-0) 0.014s
+  tri k=0: 0.269s count=551508
+  tri k=1: 0.182s count=551508
+  tri k=2: 0.181s count=551508
+  tri k=3: 0.180s count=551508
+  c4 k=0: 1.205s count=48845598
+  c4 k=1: 1.326s count=48845598
+  c4 k=2: 1.323s count=48845598
+  c4 k=3: 1.305s count=48845598
+  path round 1: 527324 rows (-310588) 0.030s
+  path round 2: 527324 rows (-0) 0.016s
+  path2 k=0: 0.054s count=50265224
+  path2 k=1: 0.052s count=50265224
+web-Google: 5105039 edges
+  cycle round 1: 4076615 rows (-1028424) 0.090s
+  cycle round 2: 3942224 rows (-134391) 0.067s
+  cycle round 3: 3917468 rows (-24756) 0.062s
+  cycle round 4: 3912147 rows (-5321) 0.063s
+  cycle round 5: 3910786 rows (-1361) 0.067s
+  cycle round 6: 3910313 rows (-473) 0.063s
+  cycle round 7: 3910164 rows (-149) 0.067s
+  cycle round 8: 3910013 rows (-151) 0.064s
+  cycle round 9: 3909976 rows (-37) 0.068s
+  cycle round 10: 3909943 rows (-33) 0.063s
+  cycle round 11: 3909925 rows (-18) 0.065s
+  cycle round 12: 3909917 rows (-8) 0.064s
+  cycle round 13: 3909906 rows (-11) 0.077s
+  cycle round 14: 3909897 rows (-9) 0.063s
+  cycle round 15: 3909891 rows (-6) 0.079s
+  cycle round 16: 3909889 rows (-2) 0.063s
+  cycle round 17: 3909887 rows (-2) 0.070s
+  cycle round 18: 3909886 rows (-1) 0.062s
+  cycle round 19: 3909886 rows (-0) 0.073s
+  tri k=0: 0.212s count=11669313
+  tri k=1: 0.249s count=11669313
+  tri k=2: 0.214s count=11669313
+  tri k=3: 0.216s count=11669313
+  tri k=4: 0.213s count=11669313
+  tri k=5: 0.206s count=11669313
+  tri k=6: 0.210s count=11669313
+  tri k=7: 0.207s count=11669313
+  tri k=8: 0.214s count=11669313
+  tri k=9: 0.213s count=11669313
+  tri k=10: 0.208s count=11669313
+  tri k=11: 0.222s count=11669313
+  tri k=12: 0.210s count=11669313
+  tri k=13: 0.223s count=11669313
+  tri k=14: 0.214s count=11669313
+  tri k=15: 0.238s count=11669313
+  tri k=16: 0.220s count=11669313
+  tri k=17: 0.223s count=11669313
+  tri k=18: 0.208s count=11669313
+  c4 k=0: 0.738s count=147058524
+  c4 k=1: 0.736s count=147058524
+  c4 k=2: 0.602s count=147058524
+  c4 k=3: 0.588s count=147058524
+  c4 k=4: 0.586s count=147058524
+  c4 k=5: 0.584s count=147058524
+  c4 k=6: 0.590s count=147058524
+  c4 k=7: 0.582s count=147058524
+  c4 k=8: 0.567s count=147058524
+  c4 k=9: 0.584s count=147058524
+  c4 k=10: 0.580s count=147058524
+  c4 k=11: 0.575s count=147058524
+  c4 k=12: 0.569s count=147058524
+  c4 k=13: 0.572s count=147058524
+  c4 k=14: 0.584s count=147058524
+  c4 k=15: 0.581s count=147058524
+  c4 k=16: 0.578s count=147058524
+  c4 k=17: 0.575s count=147058524
+  c4 k=18: 0.581s count=147058524
+  path round 1: 9106869 rows (-1103209) 0.054s
+  path round 2: 9106869 rows (-0) 0.048s
+  path2 k=0: 0.089s count=60687836
+  path2 k=1: 0.075s count=60687836

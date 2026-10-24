@@ -1,0 +1,35 @@
+diff --git a/src/optimizer/optimizer.cpp b/src/optimizer/optimizer.cpp
+index 8b45406..23169f1 100644
+--- a/src/optimizer/optimizer.cpp
++++ b/src/optimizer/optimizer.cpp
+@@ -1,4 +1,5 @@
+ #include "duckdb/optimizer/optimizer.hpp"
++#include <cstdlib>
+ 
+ #include "duckdb/execution/column_binding_resolver.hpp"
+ #include "duckdb/function/function_binder.hpp"
+@@ -170,8 +171,12 @@ void Optimizer::RunBuiltInOptimizers() {
+ 	// Perform predicate transfer and join order optimization
+ 	{
+ 		// 1. Extract information for predicate transfer, because some information may be lost in the next step.
++		// AFR comparison harness: RPT_DISABLE=1 turns predicate transfer off (vanilla DuckDB 1.3 join path)
++		static const bool pt_disabled = getenv("RPT_DISABLE") && getenv("RPT_DISABLE")[0] == '1';
+ 		PredicateTransferOptimizer PT(context);
+-		plan = PT.PreOptimize(std::move(plan));
++		if (!pt_disabled) {
++			plan = PT.PreOptimize(std::move(plan));
++		}
+ 
+ 		// 2. Then we perform the join ordering optimization, this also rewrites cross products + filters into joins and
+ 		// performs filter pushdowns
+@@ -181,7 +186,9 @@ void Optimizer::RunBuiltInOptimizers() {
+ 		});
+ 
+ 		// 3. Insert BloomFilter-related operators
+-		plan = PT.Optimize(std::move(plan));
++		if (!pt_disabled) {
++			plan = PT.Optimize(std::move(plan));
++		}
+ 	}
+ 
+ 	// rewrites UNNESTs in DelimJoins by moving them to the projection

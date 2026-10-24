@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+# downloaded graphs and derived Parquet files (see README for download commands)
+data/
+# the RPT+ DuckDB fork is cloned and built here (see README); only our patch is committed
+systems/
+# compiled kernels
+*.so
+# DuckDB spill files from large joins
+.tmp/
