@@ -1,0 +1,24 @@
+{"g": "CollegeMsg", "rows": 59835, "split": true, "k": 3, "w": "1h", "implied": false, "count": 1653, "secs": 0.028, "err": null}
+{"g": "CollegeMsg", "rows": 59835, "split": true, "k": 3, "w": "1h", "implied": true, "count": 1653, "secs": 0.023, "err": null}
+{"g": "CollegeMsg", "rows": 59835, "split": true, "k": 3, "w": "1d", "implied": false, "count": 9850, "secs": 0.026, "err": null}
+{"g": "CollegeMsg", "rows": 59835, "split": true, "k": 3, "w": "1d", "implied": true, "count": 9850, "secs": 0.024, "err": null}
+{"g": "CollegeMsg", "rows": 59835, "split": true, "k": 3, "w": "1w", "implied": false, "count": 71930, "secs": 0.028, "err": null}
+{"g": "CollegeMsg", "rows": 59835, "split": true, "k": 3, "w": "1w", "implied": true, "count": 71930, "secs": 0.026, "err": null}
+{"g": "CollegeMsg", "rows": 59835, "split": true, "k": 4, "w": "1h", "implied": false, "count": 976974, "secs": 0.233, "err": null}
+{"g": "CollegeMsg", "rows": 59835, "split": true, "k": 4, "w": "1h", "implied": true, "count": 976974, "secs": 0.121, "err": null}
+{"g": "CollegeMsg", "rows": 59835, "split": true, "k": 4, "w": "1d", "implied": false, "count": 4857318, "secs": 0.24, "err": null}
+{"g": "CollegeMsg", "rows": 59835, "split": true, "k": 4, "w": "1d", "implied": true, "count": 4857318, "secs": 0.167, "err": null}
+{"g": "CollegeMsg", "rows": 59835, "split": true, "k": 4, "w": "1w", "implied": false, "count": 32284359, "secs": 0.253, "err": null}
+{"g": "CollegeMsg", "rows": 59835, "split": true, "k": 4, "w": "1w", "implied": true, "count": 32284359, "secs": 0.216, "err": null}
+{"g": "email-Eu-core-temporal", "rows": 332334, "split": true, "k": 3, "w": "1h", "implied": false, "count": 2042, "secs": 1.992, "err": null}
+{"g": "email-Eu-core-temporal", "rows": 332334, "split": true, "k": 3, "w": "1h", "implied": true, "count": 2042, "secs": 0.088, "err": null}
+{"g": "email-Eu-core-temporal", "rows": 332334, "split": true, "k": 3, "w": "1d", "implied": false, "count": 122157, "secs": 2.018, "err": null}
+{"g": "email-Eu-core-temporal", "rows": 332334, "split": true, "k": 3, "w": "1d", "implied": true, "count": 122157, "secs": 0.12, "err": null}
+{"g": "email-Eu-core-temporal", "rows": 332334, "split": true, "k": 3, "w": "1w", "implied": false, "count": 2623231, "secs": 2.007, "err": null}
+{"g": "email-Eu-core-temporal", "rows": 332334, "split": true, "k": 3, "w": "1w", "implied": true, "count": 2623231, "secs": 0.171, "err": null}
+{"g": "email-Eu-core-temporal", "rows": 332334, "split": true, "k": 4, "w": "1h", "implied": false, "count": null, "secs": 763.0, "err": "Timeout: killed by hand after 12m43s on 48 cores"}
+{"g": "email-Eu-core-temporal", "rows": 332334, "split": true, "k": 4, "w": "1h", "implied": true, "count": 142557, "secs": 10.229, "err": null}
+{"g": "email-Eu-core-temporal", "rows": 332334, "split": true, "k": 4, "w": "1d", "implied": false, "count": null, "secs": 300.074, "err": "InterruptException: INTERRUPT Error: Interrupted!"}
+{"g": "email-Eu-core-temporal", "rows": 332334, "split": true, "k": 4, "w": "1d", "implied": true, "count": 13169807, "secs": 34.562, "err": null}
+{"g": "email-Eu-core-temporal", "rows": 332334, "split": true, "k": 4, "w": "1w", "implied": false, "count": null, "secs": 300.071, "err": "InterruptException: INTERRUPT Error: Interrupted!"}
+{"g": "email-Eu-core-temporal", "rows": 332334, "split": true, "k": 4, "w": "1w", "implied": true, "count": 739666068, "secs": 152.811, "err": null}

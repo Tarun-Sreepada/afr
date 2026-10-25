@@ -1,10 +1,12 @@
 # AFR: Adaptive Fixpoint Reduction
 
 **Verdict: AFR did not work out.** Repeating semi-join rounds past the first one does not pay on real cyclic
-workloads. It pays only on synthetic deep dead-end traps. The one positive result is a single round of
-*time-aware* semi-join filtering on temporal cycles (1.2–2× over RPT+ on the cheaper queries). That is a
-one-pass extension of predicate transfer, not a fixpoint. This repo holds the code, data pipeline and results
-of that investigation.
+workloads. It pays only on synthetic deep dead-end traps. The apparent positive result, a single round of
+*time-aware* semi-join filtering on temporal cycles (1.2–2× over RPT+ on the cheaper queries), comes from a
+missing optimizer rewrite. DuckDB does not derive the implied window predicate `f_i.ts <= f1.ts + D`. Adding it
+by hand gives the same counts and is 12–23× faster on email-Eu-core triangles, and it makes 4-cycles finish
+that otherwise don't (see *4. The implied window predicate*). This repo holds the code, data pipeline and
+results of that investigation.
 
 ## What AFR is
 
@@ -59,7 +61,8 @@ than t.
 | Do rounds past the first pay on real graphs? | **No.** On every SNAP graph, round 1 gets essentially all of the gain. Cases where 1 round *beat* the fixpoint turned out to be DuckDB picking a different hash-join build side (see *The one-round anomaly*); with the plan fixed, all round counts run equally fast. |
 | Does the fixpoint ever pay? | Only on synthetic dead-end chains of depth ≥ 8 leading into a hub (up to ~240× on triangles). |
 | Does AFR beat RPT+? | On temporal cycles, by 1.2–2× on cheap queries, from **one** round of per-key min/max timestamp bounds. That's not a fixpoint effect, and the gain vanishes on expensive queries. |
-| Does it rescue queries that time out? | No (email-Eu-core temporal 4-cycles: plain DuckDB and the AFR fixpoint both exceed 300 s). |
+| Is that a real gain? | **No.** It stands in for a rewrite DuckDB lacks: the window predicate `f_i.ts <= f1.ts + D` on the intermediate joins, implied by the query. The rewrite is exact and beats AFR by far (12–23× over the original on email-Eu-core triangles). Any temporal comparison has to use it as the baseline. |
+| Does it rescue queries that time out? | AFR doesn't (email-Eu-core temporal 4-cycles: plain DuckDB and the AFR fixpoint both exceed 300 s). The rewrite does: 10 s (1h), 35 s (1d), 153 s (1w) on 48 cores, where the original doesn't finish in 5 minutes. |
 | Do stopping rules matter? | A row-fraction rule (stop when a round removes < 5%) misses traps embedded in large tables. A time-budget rule catches them, at up to ~10% overhead when there is nothing to gain. |
 | Does REFIM-style threshold pruning (`HAVING SUM >= M`) cascade instead? | Not in non-recursive SQL. See *Threshold pruning* below. |
 
@@ -182,6 +185,9 @@ Findings:
 - `results/afr_vs_rpt_unpinned.*` is an earlier run without `numactl` pinning, kept for reference.
 - The largest joins (4-cycles on the bigger temporal graphs) spill to disk (DuckDB's `.tmp/`) even with a 96 GB
   memory limit, so their timings include spill I/O for every system.
+- **"16 threads" is not what the small graphs got.** DuckDB parallelizes a scan by row groups of 122,880 rows,
+  so CollegeMsg (60K rows) ran on 1 thread and email-Eu-core (332K) on 3. All systems share this limit, so the
+  ratios above compare like with like, but the absolute times on graphs under ~2M rows are thread-starved.
 
 ### The one-round anomaly (`experiments/one_round_anomaly.py`)
 
@@ -216,6 +222,54 @@ relative numbers matter):
   efficiency rather than in total work; this was not investigated further.
 - Profiles and full output: `results/anomaly/`.
 
+### 4. The implied window predicate (`experiments/implied_window.py`)
+
+The temporal queries require `t1 < t2 < … < tk <= t1 + D`, so every copy satisfies `f_i.ts <= f1.ts + D`. In
+the triangle query, `t2 < t3 <= t1 + D` gives `f2.ts < f1.ts + D`. The added predicate is implied by the query,
+so it cannot change the result. DuckDB doesn't derive it, so it only checks the window at the last join, after
+building every time-ordered path through the hubs. With the predicate, the intermediate join keeps only pairs of
+edges within D of each other:
+
+```sql
+SELECT count(*)
+FROM msgs f1 JOIN msgs f2 ON f1.b = f2.a AND f1.ts < f2.ts AND f2.ts <= f1.ts + 3600   -- added
+             JOIN msgs f3 ON f2.b = f3.a AND f2.ts < f3.ts AND f3.b = f1.a AND f3.ts <= f1.ts + 3600;
+```
+
+Per-node min/max bounds (AFR) can't do this: a hub always has *some* later edge, so its edges survive. The
+derived predicate bounds each pair of edges directly. Deriving such bounds is the standard closure of difference
+constraints (`x <= y + c`), so this is a baseline any optimizer could have, not a contribution.
+
+Setup: DuckDB 2.0, 48 threads, 340 GB memory limit with spilling disabled, 5 minute timeout. Graphs under 48 row
+groups were run as 48 concurrent queries on disjoint slices of f1 (`rowid % 48`), with the counts summed; each
+cycle has exactly one f1 row, so the sum is exact, and all cores are busy. Median of 3 runs under 20 s.
+
+![Original vs implied-window query time per case](results/implied_window.png)
+
+| data | query | count | original | with implied predicate | speedup |
+|---|---|---|---|---|---|
+| CollegeMsg | tri, 1h / 1d / 1w | 1,653 / 9,850 / 71,930 | 0.03 s | 0.02–0.03 s | 1.1–1.2× |
+| CollegeMsg | c4, 1h | 976,974 | 0.23 s | 0.12 s | 1.9× |
+| CollegeMsg | c4, 1d | 4,857,318 | 0.24 s | 0.17 s | 1.4× |
+| CollegeMsg | c4, 1w | 32,284,359 | 0.25 s | 0.22 s | 1.2× |
+| email-Eu-core-temporal | tri, 1h | 2,042 | 1.99 s | 0.09 s | 22.6× |
+| email-Eu-core-temporal | tri, 1d | 122,157 | 2.02 s | 0.12 s | 16.8× |
+| email-Eu-core-temporal | tri, 1w | 2,623,231 | 2.01 s | 0.17 s | 11.7× |
+| email-Eu-core-temporal | c4, 1h | 142,557 | > 12.7 min | 10.2 s | > 75× |
+| email-Eu-core-temporal | c4, 1d | 13,169,807 | > 300 s | 34.6 s | > 8.7× |
+| email-Eu-core-temporal | c4, 1w | 739,666,068 | > 300 s | 152.8 s | > 2× |
+
+Findings:
+- **The counts match in every case where the original finishes.** For the email-Eu-core 4-cycles, only the
+  rewritten query finishes, so those counts are not cross-checked.
+- **The gain is large where hubs dominate.** email-Eu-core triangles are 12–23× faster, and its 4-cycles become
+  feasible. The original 1h 4-cycle ran for 12.7 minutes on 48 cores before it was stopped by hand.
+- **On a small, sparse graph it is modest.** CollegeMsg is 1.1–1.9× faster. An earlier run without the f1 split
+  showed 7.5× on the 1h 4-cycle; that was the original running on a single thread.
+- **The gain shrinks as the window grows**, since a wider window prunes fewer pairs.
+- **Coverage:** the run stopped after email-Eu-core; the other five temporal graphs were not run. Raw rows:
+  `results/implied_window.jsonl`.
+
 ### Threshold pruning (desk check, no code)
 
 REFIM's multi-round gains come from pruning by an upper bound ("total utility ≥ min_util") that cascades. The
@@ -240,6 +294,8 @@ experiments/
   afr_kernel.cpp, afr_native.py  experiment 2: native operator with stopping rules, traps
   afr_cycle.cpp, afr_vs_rpt.py   experiment 3: per-copy equality/temporal reduction vs RPT+
   one_round_anomaly.py           profiles why 1 round can beat the fixpoint (hash-join build side)
+  implied_window.py              experiment 4: temporal cycles with the implied window predicate added
+  plot_implied_window.py         plot for experiment 4
   rptplus_disable_toggle.patch   adds RPT_DISABLE=1 to the RPT+ fork (plain DuckDB 1.3 baseline)
 results/                         CSVs, logs and plots of all runs
 data/                            downloaded graphs and Parquet files (not committed)
@@ -324,6 +380,13 @@ numactl --cpunodebind=1 --membind=1 uv run python experiments/afr_vs_rpt.py \
 ```bash
 # the one-round anomaly: profiles + fixed-plan runs for one temporal triangle case
 numactl --cpunodebind=1 --membind=1 uv run python experiments/one_round_anomaly.py sx-askubuntu --window 3600 --fixed-plan
+```
+
+```bash
+# 4. implied window predicate: original vs rewritten counts and times (whole machine; resumes from its output)
+uv run python experiments/implied_window.py CollegeMsg email-Eu-core-temporal --timeout 300
+uv run python experiments/plot_implied_window.py
+#    options: --queries tri,c4  --threads 48  --memory 340GB  --out results/implied_window.jsonl
 ```
 
 Each script writes CSVs to `results/` and replaces earlier rows for the datasets (experiment 3: dataset and
